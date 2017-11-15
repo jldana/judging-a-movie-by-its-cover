@@ -79,5 +79,8 @@ def scrape(mov_list):
 if __name__ == '__main__':
 
     mov_list = movie_parser()
-    mov_list=(mov_list[6600:])
+    # for j, i in enumerate(mov_list):
+    #     if i == 'stella_dallas':
+    #         print(j)
+    mov_list=(mov_list[7300:])
     scrape(mov_list)
