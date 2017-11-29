@@ -45,16 +45,21 @@ def namer(movie):
     return movie
 
 def the_scrape_part_ix_the_reckoning(the_list, input1):
+    counter = 0
     for item in the_list:
         movie = namer(item[0])
         post_url = item[1]
-        print('Saving {}.'.format(movie))
         file_name = movie_file_name(movie, genre_class = input1)
-        poster = request.urlopen(post_url)
-        request.urlretrieve(post_url, file_name)
-        tm.sleep(9)
+        if os.path.isfile(file_name) != True:
+            counter += 1
+            print('Saving {}: {}.'.format(movie, counter))
+            poster = request.urlopen(post_url)
+            request.urlretrieve(post_url, file_name)
+            tm.sleep(9)
+        else:
+            counter += 1
+            print("Got that one already!: {}".format(counter))
     pass
-
 
 def extract(html):
     soup = BeautifulSoup(open(html), 'html.parser')

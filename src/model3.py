@@ -1,24 +1,24 @@
 import os
-from model_aide import *
 import numpy as np
 np.random.seed(1337)  # for reproducibility
 
 
 import keras
-from keras.models import Sequential
+from keras.models import Sequential, Model, load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD, Adam
 from keras.layers.convolutional import Conv2D
-from keras.utils import np_utils
+from keras.utils import np_utils, plot_model
 from keras import backend as K
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, CSVLogger, ModelCheckpoint, EarlyStopping
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 from skimage import io
 from keras.preprocessing import image
 from keras.applications.vgg16 import VGG16
 from keras.preprocessing import image
 from keras.applications.vgg16 import preprocess_input
+
 
 # batch_size = 50 # number of training samples used at a time to update the weights
 # nb_classes = 10  # number of output possibilites: [0 - 9] (don't change)
@@ -31,25 +31,22 @@ nb_filters = 8
 # size of pooling area for max pooling
 pool_size = (2, 2) # decreases image size, and helps to avoid overfitting
 # convolution kernel size
-kernel_size = (5, 5) # slides over image to learn features
+kernel_size = (3, 3) # slides over image to learn features
 
-img_width, img_height = 224, 224
+img_width, img_height = 130, 130
 
-train_data_dir = '/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/data/train'
-validation_data_dir = '/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/data/validation'
-predict_data_dir = '/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/unknown'
-nb_train_samples = 2000
-nb_validation_samples = 600
-epochs = 50
-batch_size = 40
-num_classes = 16
+train_data_dir = '../alternate_data/data/train'
+validation_data_dir = '../alternate_data/data/validation'
+nb_train_samples = 4872
+nb_validation_samples = 1612
+epochs = 500
+batch_size = 15
+num_classes = 8
 
 if K.image_data_format() == 'channels_first':
     input_shape = (3, img_width, img_height)
 else:
     input_shape = (img_width, img_height, 3)
-
-
 
 model = Sequential()
 '''
@@ -62,46 +59,81 @@ im2 = image.img_to_array(img)
 x = np.expand_dims(im2, axis=0)
 print('expanded dims:{}'.format(x))
 x = preprocess_input(x)
-
-opt = keras.optimizers.rmsprop(lr=0.001, decay=1e-6)
-
-model.compile(loss='mean_squared_error',
-              optimizer=opt,
-              metrics=['accuracy'])
+          metrics=['accuracy'])
 '''
-
-
-
-
-
-#features = model.predict(x)
-
-model.add(Conv2D(32,  kernel_size = kernel_size, input_shape=input_shape))
+model.add(Conv2D(32, (3, 3), input_shape=input_shape))
 model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size =(2, 2)))
-#
-#model.add(VGG16(include_top=False, weights='imagenet', input_tensor=model, input_shape=input_shape, pooling=None, classes=1000))
-
-model.add(Conv2D(128,  kernel_size = kernel_size))
+model.add(Conv2D(32, (3, 3)))
 model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size = pool_size))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
 
-model.add(Conv2D(256, kernel_size = kernel_size))
-model.add(Activation('tanh'))
-model.add(MaxPooling2D(pool_size =(4, 4)))
+model.add(Conv2D(64, (3, 3), input_shape=input_shape))
+model.add(Activation('relu'))
+model.add(Conv2D(64, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
 
-model.add(Conv2D(64, kernel_size = kernel_size))
-model.add(Activation('sigmoid'))
-model.add(MaxPooling2D(pool_size =(4, 4)))
+model.add(Conv2D(128, (3, 3), padding='same'))
+model.add(Activation('relu'))
+model.add(Conv2D(128, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
 
 model.add(Flatten())
+model.add(Dense(512))
+model.add(Activation('relu'))
+model.add(Dense(256))
+model.add(Activation('relu'))
+model.add(Dense(128))
+model.add(Activation('relu'))
 model.add(Dense(64))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
-model.add(Dense(16))
+model.add(Dense(num_classes))
 model.add(Activation('softmax'))
 
-opt = keras.optimizers.rmsprop(lr=0.001, decay=1e-6)
+
+#
+#
+# #features = model.predict(x)
+#
+# model.add(Conv2D(64,  kernel_size = kernel_size, input_shape=input_shape))
+# model.add(Activation('relu'))
+# model.add(MaxPooling2D(pool_size =(2, 2)))
+# #
+# #model.add(VGG16(include_top=False, weights='imagenet', input_tensor=model, input_shape=input_shape, pooling=None, classes=1000))
+#
+# model.add(Conv2D(128,  kernel_size = kernel_size))
+# model.add(Activation('relu'))
+# model.add(MaxPooling2D(pool_size = pool_size))
+#
+# model.add(Conv2D(512, kernel_size = kernel_size))
+# model.add(Activation('relu'))
+# model.add(MaxPooling2D(pool_size =pool_size))
+#
+# model.add(Conv2D(256, kernel_size = kernel_size))
+# model.add(Activation('relu'))
+# model.add(MaxPooling2D(pool_size =(2, 2)))
+#
+# model.add(Conv2D(64, kernel_size = kernel_size))
+# model.add(Activation('relu'))
+# model.add(MaxPooling2D(pool_size =pool_size))
+#
+# model.add(Flatten())
+# model.add(Dense(64))
+# model.add(Activation('relu'))
+# model.add(Dense(64))
+# model.add(Activation('relu'))
+# model.add(Dense(32))
+# model.add(Activation('relu'))
+# model.add(Dropout(0.5))
+# model.add(Dense(10))
+# model.add(Activation('softmax'))
+
+opt = keras.optimizers.Adam(lr=0.00001, decay=0.000001)
 
 model.compile(loss='mean_squared_error',
               optimizer=opt,
@@ -118,7 +150,7 @@ print(model.summary())
 # this is the augmentation configuration we will use for training
 train_datagen = ImageDataGenerator(
     rescale=1. / 255,
-    shear_range=0.2,
+    shear_range=0.0,
     zoom_range=0.2,
     horizontal_flip=False)
 
@@ -134,13 +166,6 @@ train_generator = train_datagen.flow_from_directory(
     batch_size=batch_size,
     class_mode='categorical')
 
-'''
-tully = model.predict(img2, verbose=0)
-gross = model.predict_classes(img2, verbose=1)
-y_classes = tully.argmax(axis=1)
-print(tully)
-print(y_classes)
-'''
 
 validation_generator = test_datagen.flow_from_directory(
     validation_data_dir,
@@ -148,80 +173,34 @@ validation_generator = test_datagen.flow_from_directory(
     batch_size=batch_size,
     class_mode='categorical')
 
-#predict_generator = train_datagen.flow_from_directory(
-    # predict_data_dir,
-    # target_size=(img_width, img_height),
-    # batch_size = batch_size,
-    # class_mode='categorical')
 
-
+csvlog = CSVLogger('../log/model_log.csv', separator=',', append=True)
+earlystop = EarlyStopping(monitor='val_acc', min_delta=0.0, patience=30, verbose=1, mode='auto')
+checkpointer = ModelCheckpoint(filepath='../checkpoints/the_weights.hdf5', monitor='val_acc', verbose=1, save_best_only=True)
 
 model.fit_generator(
     train_generator,
     steps_per_epoch=nb_train_samples // batch_size,
     epochs=epochs,
     validation_data=validation_generator,
-    validation_steps=nb_validation_samples // batch_size)
+    validation_steps=nb_validation_samples // batch_size,
+    callbacks = [csvlog, checkpointer, earlystop])
 
 
-model.save_weights('first_go.h5')
+mod_plot = plot_model(model, to_file='model3.png')
+yaml_str = model.to_yaml()
+mod_file = 'mod3.yaml'
+mod_file2 = 'model_11.json'
+config_file = 'config_mod.h5'
+with open(mod_file, 'w') as f:
+    f.write(yaml_str)
+print('Model Saved!')
+model.save_weights('mod3_w_good.h5')
+print('Weights Saved!')
 
 
-
-# scores = model.evaluate(x_test, y_test, verbose=1)
-# print('Test loss:', scores[0])
-# print('Test accuracy:', scores[1])
+#model11 = Model.from_config(config)
 
 
-
-# datagen = ImageDataGenerator(
-#         rotation_range=40,
-#         width_shift_range=0.2,
-#         height_shift_range=0.2,
-#         rescale=1./255,
-#         shear_range=0.2,
-#         zoom_range=0.2,
-#         horizontal_flip=True,
-#         fill_mode='nearest')
-#
-# img = load_img('/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/movie_posters/day_at_the_races.jpg')  # this is a PIL image
-# x = img_to_array(img)
-#  # this is a Numpy array with shape (3, 150, 150)
-# x = x.reshape((1,) + x.shape)  # this is a Numpy array with shape (1, 3, 150, 150)
-#
-# df_mov = movie_db()
-# base_class, names = base_class(df_mov)
-# classes = class_handler(base_class)
-# class_df = reframe(classes, names)
-# uniques = class_df.genres.unique()
-# cleaned_uni = [genre.lower().replace(' ', '_').replace('-', '_') for genre in uniques]
-# cleaned_uni.remove('unknown')
-# cleaned_uni.remove('fantasy')
-# cleaned_uni.remove('mystery')
-#
-# print(cleaned_uni)
-# # the .flow() command below generates batches of randomly transformed images
-# # and saves the results to the `preview/` directory
-# for genre in cleaned_uni:
-#     sv_dir = '/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/
-#     i = 0
-#     for batch in datagen.flow(x, batch_size=1,
-#                               save_to_dir='/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/src/prewiew/', save_prefix='movie', save_format='jpg'):
-#         i += 1
-#         if i > 20:
-#             break  # otherwise the generator would loop indefinitely
-
-#if __name__ == '__main__':
-
-
-
-
-
-
-
-
-    #
-    # path1 = '/Users/jdilla/Desktop/Galvanize/CapStone/judging-a-movie-by-its-cover/movie_posters'
-    # for i in os.scandir(path=path1):
-    #     search_name = str(i).split(' ')[1].rstrip(".jpg'>").lstrip("'")
-    #     print(search_name)
+model.save('dont_stop.hdf5')
+print('Model Saved!')

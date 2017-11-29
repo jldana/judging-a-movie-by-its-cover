@@ -18,11 +18,7 @@ Goals:
 
 The Data:
 
-  The data I'm using here are 10000 (5010 and counting) movie posters obtained from Rottontomatoes.com. They are indexed with their genres and some other information (it would be interesting, if a second iteration of this algorithm could predict rating!).
+  The data I'm using here are 5010 and counting movie posters obtained from Rottontomatoes.com. They are indexed with their genres and some other information (it would be interesting, if a second iteration of this algorithm could predict rating!).
 
-Tasks:
 
-  Activate MVP - 11/15/17
-  Tune Model
-  Implement AWS
   
