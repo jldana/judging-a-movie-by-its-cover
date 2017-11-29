@@ -29,4 +29,8 @@ src/mod3_1212_28pc.hdf5
 src/mod3_w.h5
 src/acc logs/
 Horror/
-Poster-filer 34000x/
+Poster-filer_34000x/
+src/boto_up.py
+src/preview
+src/model.py
+src/model3.py
