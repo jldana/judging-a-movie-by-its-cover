@@ -1,5 +1,6 @@
 import pandas as pd
 from collections import Counter
+from scraper import *
 
 def movie_db():
     movie_name_data = '/Users/jdilla/Desktop/Galvanize/Week_7/Day35_031117/alt-recommender-case-study/data/movies/movies.csv'
@@ -7,10 +8,32 @@ def movie_db():
 
 def base_class(df_mov):
     base_class = []
+    mov_list = []
     df2 = df_mov['genres']
+    names = df_mov['title']
     for i in df2:
         base_class.append(i.split('|'))
-    return base_class
+    for i in names:
+        i = i.rstrip(' (1234567890)')
+        i = i.lower()
+        i = i.replace(':', '')
+        i = i.replace("'", '')
+        i = i.replace(',', '')
+        i = i.replace('.', '')
+        i = i.replace('&', 'and')
+        if i.find('(') != -1:
+            spot = (i.index('(') - 1)
+            extra = i[spot:]
+            i = i.replace(extra, '')
+        i = i.replace(' ', '_')
+        if i[-4:] == '_the':
+            i = i.replace('_the', '')
+            #mov_list.append(i)
+        if i[-2:] == '_a':
+            i = i.replace('_a', '')
+        mov_list.append(i)
+
+    return base_class, mov_list
 
 def class_handler(base_class):
     # Remove IMAX - not a genre
@@ -92,20 +115,27 @@ def class_handler(base_class):
     classes = nl19
     return classes
 
-def reframe(classes):
+def reframe(classes, names):
     classes = [' '.join(genre) for genre in classes]
     new_ser = pd.Series(classes, name='genres')
-    return pd.DataFrame(new_ser)
+    new_ser2 = pd.Series(names, name='title')
+    d = {'title': new_ser2, 'genres': new_ser}
+    return pd.DataFrame(data = d)
 
+def class_serperator(class_df):
+
+    pass
 if __name__ == '__main__':
     df_mov = movie_db()
     # for i, j in enumerate(df_mov['genres']):
     #     if j == '':
     #         print(i, j)
 
-    base_class = base_class(df_mov)
+    base_class, names = base_class(df_mov)
     classes = class_handler(base_class)
-    class_df = reframe(classes)
+    class_df = reframe(classes, names)
+
+    #print(class_df[class_df['genres'] == 'Comedy'].title.values)
 
 
 
