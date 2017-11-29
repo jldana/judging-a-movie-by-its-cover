@@ -1,0 +1,31 @@
+*.jpg
+*.pdf
+less_data/
+alt_data_2/
+alternate_data/
+checkpoints/
+log/
+src/.ipynb_checkpoints/
+src/11.25model_log.csv
+src/1125model3_prettygood.yaml
+src/1126model3_prettygood.yaml
+1125modelarch.png
+Alternate Posters/
+src/model.png
+src/model11.py
+src/model13000.py
+src/model3.png
+src/model3000.py
+src/model4000.py
+src/Untitled.ipynb
+src/Untitled1.ipynb
+src/model_builds/
+src/models/
+src/the_weights.hdf5
+src/weights.hdf5
+src/weights/
+stuff/
+src/mod3_1212_28pc.hdf5
+src/mod3_w.h5
+src/acc logs/
+Horror/
