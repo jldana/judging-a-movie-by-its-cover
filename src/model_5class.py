@@ -2,7 +2,7 @@ import os
 import numpy as np
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten, Convolution2D, MaxPooling2D
+from keras.layers import Dense, Dropout, Activation, Flatten, Convolution2D, MaxPooling2D, PReLU
 from keras.optimizers import SGD, Adam, Adamax
 from keras.layers.convolutional import Conv2D
 from keras.utils import np_utils, plot_model
@@ -11,33 +11,34 @@ from keras.callbacks import TensorBoard, CSVLogger, ModelCheckpoint, EarlyStoppi
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 from skimage import io
 from keras.preprocessing import image
+from keras import regularizers
 
 def model_builder(input_shape, num_classes):
     model = Sequential()
 
     model.add(Conv2D(32, (3, 3), input_shape=input_shape))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
 
     model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
 
     model.add(Flatten())
     model.add(Dense(512))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(Dense(256))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(Dense(128))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(Dense(64))
-    model.add(Activation('relu'))
+    model.add(PReLU(alpha_regularizer=regularizers.l2(0.01)))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes))
     model.add(Activation('softmax'))
@@ -129,3 +130,4 @@ if __name__ == '__main__':
         input_shape = (img_width, img_height, 3)
 
     model = model_builder(input_shape, num_classes)
+    model_train(batch_size, img_width, img_height, epochs)

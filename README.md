@@ -14,28 +14,49 @@ To tackle this problem I employed a Convolutional Neural Network (CNNs), which i
 4. iOS App Implimentation
 
 ## Data Aquisition
-To train my model I scraped some 10,000 images from Rotten Tomatoes using the Beautiful Soup module. I applied for an API, but since RTs parent company couldn't be bothered, I implimented some simple sleep commands in my code to slowly, under the radar, pick away at the poster images hosted on their site.
+To train my model I scraped some 10,000 images from Rotten Tomatoes using the Beautiful Soup module. I applied for an API, but since RTs parent company couldn't be bothered, I implemented some simple sleep commands in my code to slowly, under the radar, pick away at the poster images hosted on their site.
 
 ## Preprocessing and Munging
 Minimal preprocesssing was required. Images were of a uniform style and sorted during scraping into their classes. These presorted classes need some addressing. Rotten Tomatoes often applies more than one genre tag to a movie so it was necessary to make some decisions as to what belonged where.
 
-
-For movies that listed both Children's and Comendy in the genre, I called that Comedy, for example. Horror movies are all lumped into the Action/Thriller category. To simplify matters further images were transformed into square arrays of 130px X 130px. These were run through a Keras generator that preformed some light zooming and recentering, which effectively upsampled my test data.
+For movies that listed both Children's and Comedy in the genre, I called that Comedy, for example. Horror movies are all lumped into the Action/Thriller category. To simplify matters further images were transformed into square arrays of 130px X 130px. These were run through a Keras generator that preformed some light zooming and centering, which effectively upsampled my test data.
 
 ## Network Architecture
 After examining the architectures of some proven CNN’s (ImageNet, CIFAR10, VGG) I used python, numpy, sklearn, keras and tensor flow to put together my own architecture and trained my model using the powerful processing available through Amazon’s web service. I ended up with twelve (12) Convolutional Layers activated by the ReLU (Rectified Linear Unit) function and six (6) Dense Layers also activated with ReLU.
 
-The results are rather promising. For 3 classes of film, Action/Thriller, Comedy and Drama the accuracy was 66%, which isn’t amazing but is as we say in Maine, “ betta’ than guessin’.” I did start with 8 classes and then the accuracy was only 33%. When I moved to just five classes I was able to see and improvement to over 45%.
-
-If there’s time I’d like to demo my app. JAM by Jack.
-
-Going forward I’d like to further tune the existing models to eek out the best results I can. Assuming I can affect some meaningful change it would be appropriate to start looking at other aspects of a movie more related to enjoyment. i. e. Rating.
+## Results
+The results are rather promising. For 3 classes of film, Action/Thriller, Comedy and Drama the accuracy was 66%, which isn’t amazing but is as we say in Maine, “ betta’ than guessin’.” I did start with 8 classes and then the accuracy was only 33%. When I moved to just five classes I was able to see and improvement to over 45%. Recall on 3 classes was close to 70% in the Comedy genre, which I believe is due to the bright, colorful nature of many comedy movie posters. I think what confounds these results somewhat is the poster designers desire to emulate the media associated with popular films - see 'Hot Shots: Part Duex' vs. Rambo III.
 
 
-Background:
+## iOS App Implimentation
 
-  Though the common wisdom is to not judge a book by its cover,  more often then not this is exactly how we approach many choices in life. I don't think I'v ever bought a wine, for instance, with out first picking a price range and then the bottle with the label I thought looked most like a wine I'd enjoy.
-  The same goes for movies, in many cases. Despite the masses of reviews, critiques, and categorizations we are often presented with a wall of movie posters that a service like Netflix or Hulu is guessing we may like. Recommendation engines are becoming more and more sophisticated, but when it comes to movie content many of us still follow our eyes and pick a movie based just on the poster.
+Using Swift and CoreML, Apple's programing language and under-the-hood Machine Learning architecture, I created an App to accept image data and make predictions based on the trained model, described above. This is a fun tool and an example of how a tool like this could be deployed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Goals:
@@ -49,6 +70,3 @@ Goals:
 The Data:
 
   The data I'm using here are 5010 and counting movie posters obtained from Rottontomatoes.com. They are indexed with their genres and some other information (it would be interesting, if a second iteration of this algorithm could predict rating!).
-
-
-  

@@ -142,15 +142,54 @@ def model_train(model, batch_size, img_width, img_height, epochs):
     print('Model Saved!')
     pass
 
-def predict_class():
+def pred_help(comp1_files, genr):
     model = load_model('3_class_model.hdf5')
+    pred_list = []
+    for movie in comp1_files:
+        if movie == '.DS_Store':
+            pass
+        else:
+            img_path = '{}/{}'.format(genr, movie)
+            img = image.load_img(img_path, target_size=(130, 130))
+            im2 = image.img_to_array(img)
+            im2 = np.expand_dims(im2, axis=0)
+            predict = model.predict(im2, batch_size = 32, verbose = 1)
+            pred_list.append(predict.tolist())
+    return pred_list
+
+def pred_help2(pred_list, idx):
+    guessl = [0, 0, 0]
+    for guess in pred_list:
+        for i, val in enumerate(guess[0]):
+            if val > 0.8:
+                guessl[i] +=1
+    print(guessl)
+
+    return guessl
+
+def predict_class():
+    comed = '../less_data/data/validation/Comedy'
+    act_thr = '../less_data/data/validation/Action_Thriller'
+    adram = '../less_data/data/validation/Drama'
     imag = input('File to predict on: ')
-    img_path = '../predict/unknown/{}.jpg'.format(imag)
-    img = image.load_img(img_path, target_size=(130, 130))
-    im2 = image.img_to_array(img)
-    im2 = np.expand_dims(im2, axis=0)
-    predict = model.predict(im2, batch_size = 32, verbose = 1)
-    return predict
+    if imag == 'all':
+        genr = input('Which genre? (Comedy, Action_Thriller, Drama): ')
+        if genr == 'Comedy':
+            genr = comed
+            comp1_files = os.listdir(genr)
+            pred_list = pred_help(comp1_files, genr)
+            pred_help2(pred_list, 1)
+        elif genr == 'Drama':
+            genr = adram
+            comp1_files = os.listdir(genr)
+            pred_list = pred_help(comp1_files, genr)
+            pred_help2(pred_list, 2)
+        else:
+            genr = act_thr
+            comp1_files = os.listdir(genr)
+            pred_list = pred_help(comp1_files, genr)
+            pred_help2(pred_list, 0)
+    pass
 
 
 if __name__ == '__main__':
